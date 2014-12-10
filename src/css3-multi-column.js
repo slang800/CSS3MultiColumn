@@ -5,13 +5,13 @@
 
 // For additional information, see : http://www.csscripting.com/
 
-// Supported Properties: 
-// column-count 
-// column-width	
+// Supported Properties:
+// column-count
+// column-width
 // column-gap
 // column-rule
 
-// Unsupported Properties: 
+// Unsupported Properties:
 // column-rule-width (use column-rule instead)
 // column-rule-style (use column-rule instead)
 // column-rule-color (use column-rule instead)
@@ -30,28 +30,28 @@ function CSS3MultiColumn() {
 	var debug = ut.debug;
 	if(document.location.search.match('mode=debug')) var isDebug = true;
 	else var isDebug = false;
-		
-	var bestSplitPoint = null; 
+
+	var bestSplitPoint = null;
 	var secondSplitPoint = null;
 	var secondSplitBottom = 0;
 	var documentReady = false;
-	
+
 	// INITIALIZATION
 	ut.XBrowserAddEventHandler(window,'load',function() { documentReady = true;  processElements(); } );
 	loadStylesheets();
-	
+
 	// CSS PARSING
 	// --------------------------------------------------------------------------------------
-	// loadStylesheets: 
-	// Loop through the stylesheets collection and load the css text into the cssCache object	
+	// loadStylesheets:
+	// Loop through the stylesheets collection and load the css text into the cssCache object
 	function loadStylesheets() {
 		if(document.styleSheets) {	// Firefox & IE
 			// initialize cache
-			for(var i=0;i < document.styleSheets.length;i++) {			
+			for(var i=0;i < document.styleSheets.length;i++) {
 				cssCache[document.styleSheets[i].href] = false;
 			}
-			// load css in the cache			
-			for(var i=0;i < document.styleSheets.length;i++) {						
+			// load css in the cache
+			for(var i=0;i < document.styleSheets.length;i++) {
 				loadCssCache(document.styleSheets[i], 'parseStylesheets');
 			}
 		} else if (document.getElementsByTagName) { // OPERA
@@ -60,7 +60,7 @@ function CSS3MultiColumn() {
 			for(var i= 0; i<Lt.length; i++) {
 				cssCache[Lt[i].href] = false;
 			}
-			// load css in the cache	
+			// load css in the cache
 			for(var i= 0; i<Lt.length; i++) {
 				loadCssCache(Lt[i], 'parseStylesheets');
 			}
@@ -73,7 +73,7 @@ function CSS3MultiColumn() {
 	function loadCssCache(s, callback) {
 		/*
 	     Purpose: To prevent corss-domain issues
-	
+
 		 return false
 		   If location.host is not present in the stylesheet URL OR
 		   If location.host isn't present in the first 50 characters of the stylesheet URL
@@ -87,13 +87,13 @@ function CSS3MultiColumn() {
 			cssCache[s.href] = s.cssText;
 			eval(callback)();
 		}
-		if (s.href && typeof XMLHttpRequest!='undefined') {	
+		if (s.href && typeof XMLHttpRequest!='undefined') {
 			var xmlhttp = new XMLHttpRequest();
  			//if(xmlhttp.abort) xmlhttp.abort();
 			xmlhttp.onreadystatechange = function() {
 				if(xmlhttp.readyState == 4) {
 					if(typeof xmlhttp.status == 'undefined' || xmlhttp.status == 200 || xmlhttp.status == 304 ) {
-						cssCache[s.href] = xmlhttp.responseText;								
+						cssCache[s.href] = xmlhttp.responseText;
 						eval(callback)();
 					}
 				}
@@ -102,75 +102,75 @@ function CSS3MultiColumn() {
 			xmlhttp.send(null);
 		}
 	}
-	
+
 	// parseStylesheets:
 	// Iterates the cssCache object and send the serialized css to the mini-parser.
-	function parseStylesheets() {		
+	function parseStylesheets() {
 		var allDone = true;
 		for(var i in cssCache) {
 			if(cssCache[i]!=false) parseStylesheet(cssCache[i]);
 			else allDone = false;
-		}		
-		if(allDone) {			
+		}
+		if(allDone) {
 			processElements();
 		}
 	}
 
 	// parseStylesheet:
-	// Loads the pseudoCSSRules object with the values for column-count, column-width, column-gap... 
+	// Loads the pseudoCSSRules object with the values for column-count, column-width, column-gap...
 	function parseStylesheet(cssText) {
-									
+
  		// Retrieving column-count property
 		var cc = new ut.getPseudoCssRules('column-count',cssText);
 		for(var i=0; cc && i<cc.cssRules.length;i++) {
-			if(!pseudoCSSRules[cc.cssRules[i].selectorText]) 
+			if(!pseudoCSSRules[cc.cssRules[i].selectorText])
 				pseudoCSSRules[cc.cssRules[i].selectorText] = new Object();
 			pseudoCSSRules[cc.cssRules[i].selectorText]['column-count'] = cc.cssRules[i].value;
-		}	
+		}
 		// Retrieving column-width property
-		cc = new ut.getPseudoCssRules('column-width',cssText);				
+		cc = new ut.getPseudoCssRules('column-width',cssText);
 		for(var i=0; cc && i<cc.cssRules.length;i++) {
-			if(!pseudoCSSRules[cc.cssRules[i].selectorText]) 
+			if(!pseudoCSSRules[cc.cssRules[i].selectorText])
 				pseudoCSSRules[cc.cssRules[i].selectorText] = new Object();
 			pseudoCSSRules[cc.cssRules[i].selectorText]['column-width'] = cc.cssRules[i].value;
 		}
 		// Retrieving column-gap property
 		cc = new ut.getPseudoCssRules('column-gap',cssText);
 		for(var i=0; cc && i<cc.cssRules.length;i++) {
-			if(!pseudoCSSRules[cc.cssRules[i].selectorText]) 
+			if(!pseudoCSSRules[cc.cssRules[i].selectorText])
 				pseudoCSSRules[cc.cssRules[i].selectorText] = new Object();
 			pseudoCSSRules[cc.cssRules[i].selectorText]['column-gap'] = cc.cssRules[i].value;
-		}			
+		}
 		// Retrieving column-rule property
 		cc = new ut.getPseudoCssRules('column-rule',cssText);
 		for(var i=0; cc && i<cc.cssRules.length;i++) {
-			if(!pseudoCSSRules[cc.cssRules[i].selectorText]) 
+			if(!pseudoCSSRules[cc.cssRules[i].selectorText])
 				pseudoCSSRules[cc.cssRules[i].selectorText] = new Object();
 			pseudoCSSRules[cc.cssRules[i].selectorText]['column-rule'] = cc.cssRules[i].value;
-		}			
+		}
 	}
-	
- 	// COLUMN PROCESSING 
+
+ 	// COLUMN PROCESSING
 	function processElements() {
 		// wait for page to finish loading
 		if(!documentReady) return;
-		
+
 		for(var i in pseudoCSSRules) {
-			debug(i + ' cc:' + pseudoCSSRules[i]['column-count'] + ' cw:' + pseudoCSSRules[i]['column-width'] + ' cr:' + pseudoCSSRules[i]['column-rule'] + ' cg:' + pseudoCSSRules[i]['column-gap']);			
-			var affectedElements = ut.cssQuery(i);			
+			debug(i + ' cc:' + pseudoCSSRules[i]['column-count'] + ' cw:' + pseudoCSSRules[i]['column-width'] + ' cr:' + pseudoCSSRules[i]['column-rule'] + ' cg:' + pseudoCSSRules[i]['column-gap']);
+			var affectedElements = ut.cssQuery(i);
 			for(var j=0;j<affectedElements.length;j++) {
-				//debug("affected element: " + affectedElements[j].tagName + ' [' + affectedElements[j].id + ' / ' + affectedElements[j].className + ']');																			 
+				//debug("affected element: " + affectedElements[j].tagName + ' [' + affectedElements[j].id + ' / ' + affectedElements[j].className + ']');
 				processElement(affectedElements[j], pseudoCSSRules[i]['column-count'], pseudoCSSRules[i]['column-width'], pseudoCSSRules[i]['column-gap'], pseudoCSSRules[i]['column-rule']);
 			}
 		}
 	}
-	
+
 	function processElement(affectedElement, column_count, column_width, column_gap, column_rule ) {
 		//affectedElement.style.visibility = 'hidden';
 		var widthUnit;
 		var width;
 		var column_rule_width = 0;
-		
+
 		// Get available width
 		// see http://www.csscripting.com/css-multi-column/dom-width-height.php
 		// offsetWidth & scrollWidth are the only consistent values across browsers.
@@ -178,54 +178,54 @@ function CSS3MultiColumn() {
 		// scrollWidth includes border and padding
 		// clientWidth when available includes padding only.
 		// see http://msdn.microsoft.com/workshop/author/om/measuring.asp
-		
-		if(affectedElement.clientWidth && affectedElement.clientWidth != 0) {			
+
+		if(affectedElement.clientWidth && affectedElement.clientWidth != 0) {
 			var padding;
 			if(affectedElement.currentStyle) {
-				padding = parseInt(affectedElement.currentStyle.paddingLeft.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.paddingRight.replace(/[\D]*/gi,""))  
+				padding = parseInt(affectedElement.currentStyle.paddingLeft.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.paddingRight.replace(/[\D]*/gi,""))
 			} else if (document.defaultView && document.defaultView.getComputedStyle) {
-				padding = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))  
-				//padding = parseInt(window.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(window.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))  
-			} 
-			
-			if (isNaN(padding)) padding = 0;  
+				padding = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))
+				//padding = parseInt(window.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(window.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))
+			}
+
+			if (isNaN(padding)) padding = 0;
 			width = (affectedElement.clientWidth - padding).toString() + "px";
 		}
 		else if(affectedElement.scrollWidth) {
 			var borderWidth;
 			var padding;
-			
+
 			if(affectedElement.currentStyle) {
-				padding = parseInt(affectedElement.currentStyle.paddingLeft.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.paddingRight.replace(/[\D]*/gi,""))  
-			} else if (document.defaultView && document.defaultView.getComputedStyle) {				
-				padding = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))  
-			}
-			
-			if (isNaN(padding)) padding = 0;  
-				
-			if(affectedElement.currentStyle) {
-				borderWidth = parseInt(affectedElement.currentStyle.borderLeftWidth.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.borderRightWidth.replace(/[\D]*/gi,""))  
+				padding = parseInt(affectedElement.currentStyle.paddingLeft.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.paddingRight.replace(/[\D]*/gi,""))
 			} else if (document.defaultView && document.defaultView.getComputedStyle) {
-				borderWidth = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("border-left-width").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("border-right-width").replace(/[\D]*/gi,""))  
+				padding = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("padding-left").replace(/[\D]*/gi,""))
+			}
+
+			if (isNaN(padding)) padding = 0;
+
+			if(affectedElement.currentStyle) {
+				borderWidth = parseInt(affectedElement.currentStyle.borderLeftWidth.replace(/[\D]*/gi,"")) + parseInt(affectedElement.currentStyle.borderRightWidth.replace(/[\D]*/gi,""))
+			} else if (document.defaultView && document.defaultView.getComputedStyle) {
+				borderWidth = parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("border-left-width").replace(/[\D]*/gi,"")) + parseInt(document.defaultView.getComputedStyle(affectedElement,"").getPropertyValue("border-right-width").replace(/[\D]*/gi,""))
 			}
 			if (isNaN(borderWidth)) borderWidth = 0;
-			
-			width = (affectedElement.scrollWidth - padding - borderWidth).toString() + "px";			
-		}
-		else width = "99%"; // ever used? 
 
-		var availableWidth = parseInt(width.replace(/[\D]*/gi,""));			
+			width = (affectedElement.scrollWidth - padding - borderWidth).toString() + "px";
+		}
+		else width = "99%"; // ever used?
+
+		var availableWidth = parseInt(width.replace(/[\D]*/gi,""));
 
 		// Get width unit
-		if(!column_width || column_width == 'auto') 
+		if(!column_width || column_width == 'auto')
 		   	widthUnit = width.replace(/[\d]*/gi,"");
 		else
 			widthUnit = column_width.replace(/[\d]*/gi,"");
-		if(!widthUnit) 
+		if(!widthUnit)
 			widthUnit = "px";
-		
+
 		if(!column_gap) { // Compute column spacing (column_gap)
-			if(widthUnit=="%") 
+			if(widthUnit=="%")
 				column_gap = 1; //%;
 			else
 				column_gap = 15; //px;
@@ -236,8 +236,8 @@ function CSS3MultiColumn() {
 			column_gap = Math.floor(column_gap/2);
 			// we add half the original column_gap to the column_rule_width to fix the column_width count below.
 			column_rule_width = column_gap + parseInt(column_rule.substring(column_rule.search(/\d/),column_rule.search(/\D/)));
-		}		
-		if(!column_width || column_width == 'auto') {// Compute columns' width 
+		}
+		if(!column_width || column_width == 'auto') {// Compute columns' width
 			column_width = (availableWidth-((column_gap+column_rule_width)*(column_count-1))) / column_count;
 		} else {
 			column_width = parseInt(column_width.replace(/[\D]*/gi,""))
@@ -245,12 +245,12 @@ function CSS3MultiColumn() {
 				column_count = Math.floor(availableWidth / (column_width + column_gap));
 			}
 		}
-		
-		column_width -= 1; 
-		
+
+		column_width -= 1;
+
 		// Create a wrapper
 		var wrapper = document.createElement('div'); //affectedElement.tagName
-		var pn = affectedElement.parentNode;  
+		var pn = affectedElement.parentNode;
 		wrapper = pn.insertBefore(wrapper, affectedElement);
 		var elem =  pn.removeChild(affectedElement);
 		elem = wrapper.appendChild(elem);
@@ -263,57 +263,57 @@ function CSS3MultiColumn() {
 		// Assign the content element a random Id ?
 		elem.id = ut.randomId();
 
-		// Adjust content's width and float the element 
+		// Adjust content's width and float the element
 		elem.style.width = column_width.toString() + widthUnit;
 		//elem.style.padding = "0";
-		//elem.style.margin = "0"; 
-		
+		//elem.style.margin = "0";
+
 		if(typeof elem.style.styleFloat != 'undefined')
-			elem.style.styleFloat  = "left"; 
-		if(typeof elem.style.cssFloat != 'undefined') 
-			elem.style.cssFloat  = "left"; 
+			elem.style.styleFloat  = "left";
+		if(typeof elem.style.cssFloat != 'undefined')
+			elem.style.cssFloat  = "left";
 
 		// Compute Desired Height
 		var newHeight = Math.floor(elem.offsetHeight / column_count)+14;
 		if(!wrapper.id) wrapper.id = ut.randomId();
-		
+
 		// Find split points (j is the max # of attempts to find a good height with no unsplittable element on the split point.
 		var j=1;
 		for(var i=1; i < column_count && elem && j < (column_count + 5) ; i++) {
 			bestSplitPoint = null;
 			secondSplitPoint = null;
 			secondSplitBottom = 0;
-			findSplitPoint(elem, newHeight*i, wrapper);			
-			
+			findSplitPoint(elem, newHeight*i, wrapper);
+
 			if(isDebug) bestSplitPoint.style.border = "1px solid #00FF00";
 
 			if(bestSplitPoint && !isElementSplitable(bestSplitPoint)) {
-					
+
 					newHeight = getElementRelativeTop(bestSplitPoint, wrapper) + bestSplitPoint.offsetHeight + 10;
 					i=1; // reset the height. Try again.
 					debug('reset new Height = '+newHeight + ' relativetop=' + getElementRelativeTop(bestSplitPoint, wrapper) + ' offsetHeight= ' + bestSplitPoint.offsetHeight );
-			}			
-			else if (!bestSplitPoint) {
-				debug("No split point found with " + newHeight); 
 			}
-			
+			else if (!bestSplitPoint) {
+				debug("No split point found with " + newHeight);
+			}
+
 			j++;
 		}
-		
+
 		//wrapper.style.minHeight = newHeight + 'px';
 		//if(document.all && !window.opera)
 			//wrapper.style.height = newHeight + 'px';
 		debug('<table><tr><td>Avail. Width</td><td>'+availableWidth+'</td><td>Units</td><td>'+widthUnit+'</td></tr><tr><td>column_width</td><td>'+column_width+'</td><td>column_count</td><td>'+column_count+'</td></tr><tr><td>column_gap</td><td>'+column_gap+'</td><td>column_rule</td><td>'+column_rule+'</td></tr><tr><td>New Height</td><td>' + newHeight + '</td><td></td><td></td></tr></table>'  );
- 		
+
 		for(var i=1; i < column_count && elem; i++) {
 			// Find the split point (a child element, sitting on the column split point)
 			bestSplitPoint = null;
 			secondSplitPoint = null;
 			secondSplitBottom = 0;
-			
+
 			findSplitPoint(elem, newHeight, wrapper);
 			if(bestSplitPoint && isElementSplitable(bestSplitPoint) && elem.id != bestSplitPoint.id) {
-				var splitE = bestSplitPoint;				
+				var splitE = bestSplitPoint;
 				if(isDebug) secondSplitPoint.style.border = "1px dotted #00F";
 			}
 			else {
@@ -323,26 +323,26 @@ function CSS3MultiColumn() {
 				debug("<hr />No split point found for " + elem.tagName + ' ' + newHeight);
 				return;
 			}
-			
+
 			// DEBUG ONLY: SHOW SPLIT ELEMENT
 			//debug("split top=" + getElementRelativeTop(splitE, wrapper));
 			if(isDebug) splitE.style.border = "1px solid #F00";
 			// END DEBUG ONLY: SHOW SPLIT ELEMENT
-			
-			// Create New Column	
+
+			// Create New Column
 			var newCol = elem.cloneNode(false);
 			newCol.id = ut.randomId();
-			
+
 			// Insert new column in the document
 			elem.parentNode.insertBefore(newCol, elem.nextSibling);
 
 			// Add the column_gap
 			newCol.style.paddingLeft = column_gap + widthUnit;
-						
+
 			// Add the column_rule
-			if(column_rule && column_rule != 'none') {				
+			if(column_rule && column_rule != 'none') {
 				newCol.style.borderLeft = column_rule;
-				elem.style.paddingRight = column_gap + widthUnit;				
+				elem.style.paddingRight = column_gap + widthUnit;
 			}
 			if(document.all && !window.opera)
 				elem.style.height = newHeight+'px';
@@ -351,24 +351,24 @@ function CSS3MultiColumn() {
 			// Move all elements after the element to be splitted (splitE) to the new column
 			var insertPoint = createNodeAncestors(splitE,elem, newCol, 'append');
 
-			var refElement = splitE;			
+			var refElement = splitE;
 			while(refElement && refElement.id != elem.id ) {
 				var littleSib = refElement.nextSibling;
 				while(littleSib) {
 					moveNode(littleSib, elem, newCol);
-					littleSib = refElement.nextSibling;				
+					littleSib = refElement.nextSibling;
 				}
-				refElement = refElement.parentNode; 
+				refElement = refElement.parentNode;
 			}
 
-			var strippedLine = splitElement(splitE, newHeight - getElementRelativeTop(splitE, wrapper), elem, newCol);			
+			var strippedLine = splitElement(splitE, newHeight - getElementRelativeTop(splitE, wrapper), elem, newCol);
 
 			// cleaning emptied elements
-			var pn = splitE.parentNode;			
+			var pn = splitE.parentNode;
 			while(pn && pn.id != elem.id) {
 				var n = pn.firstChild;
-				while(n) {					
-					if((n.nodeType==1 && n.childNodes.length == 0) || 
+				while(n) {
+					if((n.nodeType==1 && n.childNodes.length == 0) ||
 						(n.nodeType==3 && n.nodeValue.replace(/[\u0020\u0009\u000A]*/,'') == "")) {
 						pn.removeChild(n);
 						n = pn.firstChild;
@@ -377,19 +377,19 @@ function CSS3MultiColumn() {
 					}
 				}
 				pn = pn.parentNode;
-			}	
-			
-			// if text-align is justified, insert &nbsp; to force the justify	
+			}
+
+			// if text-align is justified, insert &nbsp; to force the justify
 			if(strippedLine) {
 				splitE = elem.lastChild;
 				if(splitE && (document.defaultView  && document.defaultView.getComputedStyle(splitE,'').getPropertyValue('text-align')=='justify') ||
 				   (splitE.currentStyle && splitE.currentStyle.textAlign == 'justify')) {
 					  var txtFiller = document.createTextNode(' ' + strippedLine.replace(/./g,"\u00a0")); // &nbsp;
-					  var filler = document.createElement('span');				  
-					  splitE.appendChild(filler); 		
+					  var filler = document.createElement('span');
+					  splitE.appendChild(filler);
 					  filler.style.lineHeight="1px";
 					  filler.appendChild(txtFiller);
-				} 
+				}
 			}
 			// move on to split the newly added column
 			elem = newCol;
@@ -397,21 +397,21 @@ function CSS3MultiColumn() {
 		if(elem) {//mainly to set the column rule at the right height.
 			if(document.all && !window.opera)
 				elem.style.height = newHeight+'px';
-			elem.style.minHeight = newHeight+'px';  
+			elem.style.minHeight = newHeight+'px';
 		}
-		
+
 		var clearFloatDiv = document.createElement('div');
 		clearFloatDiv.style.clear = "left";  // < bug in Safari 1.3 ? (duplicates content)
 		clearFloatDiv.appendChild(document.createTextNode(' '));
 		wrapper.appendChild(clearFloatDiv);
 		if(navigator.userAgent.toLowerCase().indexOf('safari') + 1)
 			wrapper.innerHTML+=' '; // forces redraw in safari and fixes bug above.
-		
-		//wrapper.style.visibility = 'visible'; 				
+
+		//wrapper.style.visibility = 'visible';
 	}
-	
+
 	// Find the deepest splitable element that sits on the split point.
-	function findSplitPoint(n, newHeight, wrapper) {		
+	function findSplitPoint(n, newHeight, wrapper) {
 		if (n.nodeType==1) {
 			var top = getElementRelativeTop(n, wrapper);
 			var bot = top+n.offsetHeight;
@@ -423,7 +423,7 @@ function CSS3MultiColumn() {
 					}
 				}
 				return;
-			} 
+			}
 			if(bot <= newHeight && bot >= secondSplitBottom) {
 				secondSplitBottom = bot;
 				secondSplitPoint = n;
@@ -431,22 +431,22 @@ function CSS3MultiColumn() {
 		}
 		return;
 	}
-	
+
 	function isElementSplitable(n) {
 		if(n.tagName) {
-			var tagName = n.tagName.toUpperCase();			
+			var tagName = n.tagName.toUpperCase();
 			for(var i=0;i<splitableTags.length;i++)
 				if(tagName==splitableTags[i]) return true;
 		}
 		return false;
 	}
-		
+
 	function splitElement(n, targetHeight, col1, col2) {
-		
+
 		var cn = n.lastChild;
 		while(cn) {
-			// if the child node is a text node 			
-			if(cn.nodeType==3) {				
+			// if the child node is a text node
+			if(cn.nodeType==3) {
 				var strippedText = "dummmy";
 				var allStrippedText = "";
 				// the +2 is for tweaking.. allowing lines to fit more easily
@@ -455,14 +455,14 @@ function CSS3MultiColumn() {
 					strippedText = stripOneLine(cn);
 					allStrippedText = strippedText + allStrippedText;
 				}
-				if(allStrippedText!="") {					
+				if(allStrippedText!="") {
 					var insertPoint = createNodeAncestors(cn,col1,col2,'insertBefore');
 					insertPoint.insertBefore(document.createTextNode(allStrippedText), insertPoint.firstChild);
-				} 
+				}
 				if(cn.nodeValue=="") {
 					cn.parentNode.removeChild(cn);
 				}
-				else 
+				else
 					break;
 			}
 			else {
@@ -474,7 +474,7 @@ function CSS3MultiColumn() {
 		}
 		return strippedText; // returns the last line of text removed (used later for forcing the justification)
 	}
-	
+
 
 	// stripOneLine()
 	// This function removes exactly one line to
@@ -482,40 +482,40 @@ function CSS3MultiColumn() {
 	// and returns the removed text as a string.
 	function stripOneLine (n) {
 		// get the text node
-		while(n && n.nodeType != 3) 
+		while(n && n.nodeType != 3)
 			n = n.firstChild;
 		if(!n) return;
-	
+
 		// get the height of the element
 		var e = n.parentNode;
 		var h = e.offsetHeight;
-		
+
 		if(!h) {
 			//debug('no height for: ' + e.tagName);
 			return "";
 		}
-	
+
 		// get the text as a string
 		var str = n.nodeValue;
-		
+
 		// remove a word from the end of the string
-		// until the height of the element changes 
+		// until the height of the element changes
 		// (ie. a line has been removed)
 		var wIdx= n.nodeValue.lastIndexOf(' ');
-		while(wIdx!=-1 && e.offsetHeight == h) {			
+		while(wIdx!=-1 && e.offsetHeight == h) {
 			n.nodeValue = n.nodeValue.substr(0,	wIdx);
 			wIdx = n.nodeValue.lastIndexOf(' ');
 			if(wIdx==-1) wIdx = n.nodeValue.lastIndexOf('\n');
 			//debug(e.offsetHeight + ' ' + h + ' text=' + n.nodeValue + ' wIdx= ' + wIdx);
-		} 
-		
+		}
+
 		if(e.offsetHeight == h)
 			n.nodeValue = "";
 		// returns the removed text
 
 		return str.substr(n.nodeValue.length);
 	}
-	
+
 	// method= 'append'/'insertBefore', relative to col2
 	function createNodeAncestors(n,col1,col2,method) {
 		var ancestors = new Array;
@@ -525,14 +525,14 @@ function CSS3MultiColumn() {
 			ancestors[ancestors.length] = pn;
 			if(!pn.id) pn.id = ut.randomId();
 			pn = pn.parentNode;
-		}		
-		
+		}
+
 		for (var i=ancestors.length-1; i >= 0; i--) {
-			
+
 			for(var j=0; j < insertNode.childNodes.length && (insertNode.childNodes[j].nodeType==3 || !insertNode.childNodes[j].className.match(ancestors[i].id+'-css3mc')); j++);
 
-			if(j==insertNode.childNodes.length) { 					
-				// Ancestor node not found, needs to be created.				
+			if(j==insertNode.childNodes.length) {
+				// Ancestor node not found, needs to be created.
 				if(method=='append')
 					insertNode = insertNode.appendChild(document.createElement(ancestors[i].tagName));
 				else
@@ -544,7 +544,7 @@ function CSS3MultiColumn() {
 					var prevsib = n.previousSibling;
 					var count=0;
 					while(prevsib) {
-						if(prevsib.nodeType==1 && prevsib.tagName.toUpperCase() == 'LI') 
+						if(prevsib.nodeType==1 && prevsib.tagName.toUpperCase() == 'LI')
 							count++;
 						prevsib = prevsib.previousSibling;
 					}
@@ -557,7 +557,7 @@ function CSS3MultiColumn() {
 					var prevsib = n.previousSibling;
 					var count=0;
 					while(prevsib) {
-						if(prevsib.nodeType==1 && prevsib.tagName.toUpperCase() == 'LI') 
+						if(prevsib.nodeType==1 && prevsib.tagName.toUpperCase() == 'LI')
 							count++;
 						prevsib = prevsib.previousSibling;
 					}
@@ -567,8 +567,8 @@ function CSS3MultiColumn() {
 		}
 		return insertNode;
 	}
-	
-	function moveNode(n,col1,col2) {		
+
+	function moveNode(n,col1,col2) {
 		var insertNode=createNodeAncestors(n,col1,col2, 'append');
 		var movedNode = insertNode.appendChild(n.parentNode.removeChild(n));
 		if(insertNode.id == col2.id && movedNode.nodeType ==1 ) {
@@ -577,18 +577,18 @@ function CSS3MultiColumn() {
 		}
 		return movedNode;
 	}
-	
-	
+
+
 	function getElementRelativeTop(obj, refObj) {
 		var cur = 0;
-		if(obj.offsetParent) {		
+		if(obj.offsetParent) {
 			while(obj.offsetParent) {
 				cur+=obj.offsetTop;
 				obj = obj.offsetParent;
 			}
 		}
 		var cur2 = 0;
-		if(refObj.offsetParent) {		
+		if(refObj.offsetParent) {
 			while(refObj.offsetParent) {
 				cur2+=refObj.offsetTop;
 				refObj = refObj.offsetParent;
@@ -596,14 +596,14 @@ function CSS3MultiColumn() {
 		}
 		return cur-cur2; // + document.body.offsetTop;
 	}
-	
+
 }
 
 // =====================================================================================
 // Utility Class Constructor skeleton
 function CSS3Utility() {
 	// Event Handler utility list
-	this.handlerList = new Array(); 
+	this.handlerList = new Array();
 }
 
 
@@ -617,7 +617,7 @@ function CSS3Utility() {
     Author:  Dean Edwards/2004
     Web:     http://dean.edwards.name/
 */
-CSS3Utility.prototype.cssQuery = function() { 
+CSS3Utility.prototype.cssQuery = function() {
 
     var version = "1.0.1"; // timestamp: 2004/05/25
 
@@ -905,34 +905,34 @@ CSS3Utility.prototype.cssQuery = function() {
 }();
 
 // Cross-Browser event handler.
-CSS3Utility.prototype.XBrowserAddEventHandler = function(target,eventName,handlerName) {      
+CSS3Utility.prototype.XBrowserAddEventHandler = function(target,eventName,handlerName) {
 	if(!target) return;
-	if (target.addEventListener) { 
+	if (target.addEventListener) {
 		target.addEventListener(eventName, function(e){eval(handlerName)(e);}, false);
-	} else if (target.attachEvent) { 
+	} else if (target.attachEvent) {
 		target.attachEvent("on" + eventName, function(e){eval(handlerName)(e);});
-		} else { 
-		// THIS CODE NOT TESTED 
-		var originalHandler = target["on" + eventName]; 
-		if (originalHandler) { 
-		  target["on" + eventName] = function(e){originalHandler(e);eval(handlerName)(e);}; 
-		} else { 
-		  target["on" + eventName] = eval(handlerName); 
-		} 
-	} 
+		} else {
+		// THIS CODE NOT TESTED
+		var originalHandler = target["on" + eventName];
+		if (originalHandler) {
+		  target["on" + eventName] = function(e){originalHandler(e);eval(handlerName)(e);};
+		} else {
+		  target["on" + eventName] = eval(handlerName);
+		}
+	}
 	// Keep track of added handlers.
 	var l = this.handlerList.length;
 	this.handlerList[l] = new Array(2);
-	this.handlerList[l][0] = target.id;  
-	this.handlerList[l][1] = eventName;  	
+	this.handlerList[l][0] = target.id;
+	this.handlerList[l][1] = eventName;
 	// see http://weblogs.asp.net/asmith/archive/2003/10/06/30744.aspx
-	// for a complete XBrowserAddEventHandler 
+	// for a complete XBrowserAddEventHandler
 }
 
 
 
 // getPseudoCssRules()
-// Constructor for a pseudo-css rule object 
+// Constructor for a pseudo-css rule object
 // (an unsupported property, thus not present in the DOM rules collection)
 
 // Constructor parameters
@@ -940,7 +940,7 @@ CSS3Utility.prototype.XBrowserAddEventHandler = function(target,eventName,handle
 // the css property name
 // the stylesheet (as a text stream)
 
-// Object properties: 
+// Object properties:
 // ------------------
 // selector (string)
 // property (string)
@@ -952,18 +952,18 @@ CSS3Utility.prototype.getPseudoCssRules = function(propertyName, serializedStyle
 	var regx = new RegExp(valuePattern,"g");
 	var regxMatch = regx.exec(serializedStylesheet);
 	var j=0;
-	
+
 	while(regxMatch){
 		var str = serializedStylesheet.substr(0,serializedStylesheet.substr(0,serializedStylesheet.indexOf(regxMatch[0])).lastIndexOf('{'));
 		var selectorText = str.substr(str.lastIndexOf('}')+1).replace(/^\s*|\s*$/g,"");
-		// ignore commented rule !!  
+		// ignore commented rule !!
 		this.cssRules[j] = new Object();
 		this.cssRules[j].selectorText = selectorText;
 		this.cssRules[j].property = propertyName;
 		this.cssRules[j].value = regxMatch[1].replace(/(\r?\n)*/g,"");  // suppress line breaks
 		j++;
 		regxMatch = regx.exec(serializedStylesheet);
-	}	
+	}
 }
 
 
@@ -975,16 +975,16 @@ CSS3Utility.prototype.randomId = function () {
 	return rId;
 }
 
-CSS3Utility.prototype.debug = function(text) { 
+CSS3Utility.prototype.debug = function(text) {
 	var debugOutput = document.getElementById('debugOutput'); // Debug Output
 	if(typeof debugOutput != "undefined" && debugOutput) {
-		//debugOutput.appendChild(document.createElement('hr')); 
-		//debugOutput.appendChild(document.createTextNode(text)); 
+		//debugOutput.appendChild(document.createElement('hr'));
+		//debugOutput.appendChild(document.createTextNode(text));
 		debugOutput.innerHTML+= text;
 	}
 }
 
 
- 
+
 // Object Instance
 var css3MC = new CSS3MultiColumn();
